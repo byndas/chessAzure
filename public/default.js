@@ -95,8 +95,6 @@ function setClock(time) {
 
 	showTimers(document.getElementById('time1'));
 	showTimers(document.getElementById('time2'));
-
-	showTimers(document.getElementById('chat'));
 }
 
 function showTimers(timer) {
@@ -801,10 +799,12 @@ function pinnedPieceLit() {
 ////////////////////////
 
 function toggleSides() {
+	console.log(activeSide[0].dataset.side + ' moves on this board');
 	// removes click-listeners from activePieces
 	activeSide.forEach(activePiece => {
 		activePiece.removeEventListener('click', wherePieceCanMove);
 	});
+	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
 	if (activeSide[0].dataset.side === 'blue') {
 		activeSide = oranges;
 		passiveSide = blues;
@@ -813,9 +813,20 @@ function toggleSides() {
 		activeSide = blues;
 		passiveSide = oranges;
 	}
-	sendMove(); // sends two clicks to opponent's socket
-	awaitMove(); // listens for opponent's move to arrive
-	lit(); // starts next move 
+	console.log(activeSide[0].dataset.side + ' is now active');
+	console.log(passiveSide[0].dataset.side + ' is now passive');
+
+	// !! removes click-listeners from activePieces
+	// activeSide.forEach(activePiece => {
+	// 	activePiece.removeEventListener('click', wherePieceCanMove);
+	// });
+
+	// sends your two clicks to opponent's socket
+	socket.emit('move', [pieceToMove.id, goToDiv.id]);
+	console.log([socket.id, [pieceToMove.id, goToDiv.id]]);
+	console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
+	
+	awaitMove();
 }
 
 function gameOverModal() {
@@ -1962,40 +1973,39 @@ function getMinutes() {
 				///////////////////
 				setClock(timerSet);
 				/////////////////////////////////////////////////////////////////////////////////////////////
-				// once socket confirms that player2 accepts game, do this:
-				// document.getElementById('modal').style.display = 'none';
-				// document.getElementById('resign').classList.remove('noClick');
-				// lit();
+				socket.on('gameAccepted', function() {
+					document.getElementById('modal').style.display = 'none';
+					document.getElementById('resign').classList.remove('noClick');
+					lit();
+				});
 			}
 		}
-	}
+	}  // FIRST PLAYER LOGIC
 }
 
 //////////////////////
 
-function sendMove() {
-	socket.emit('move', [pieceToMove.id, goToDiv.id]);
-} // sends your two clicks to opponent's socket
-
-//////////////////////
-
 function awaitMove() {
-	// makes activeSide un-clickable
-	activeSide.forEach(activePiece => {
-		activePiece.removeEventListener('click', wherePieceCanMove);
-	});
-	socket.on('move', function(msg) {
-		// makes activeSide re-clickable
-		activeSide.forEach(activePiece => {
-			activePiece.addEventListener('click', wherePieceCanMove);
-		});
-		// socket.emit('move', msg); ??
+	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
+//------------------------------------------------------------------------------------------
+	// STOP THIS FROM RUNNING 
+	socket.on('move', function(clicks) {
+
+		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
+		
+		lit(); // starts next move
+		console.log('lit();');
+
+		///////////////////////////////////////////
 		
 		// triggers both clicks
-		document.getElementById(msg[0]).click();
-		document.getElementById(msg[1]).click();
+		document.getElementById(clicks[0]).click();
+		document.getElementById(clicks[1]).click();
+		
+		console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
 	});	
-} // listens to socket for opponent's move to arrive, then updates board
+} // listens to socket for opponent's move to arrive
+// then updates board & sends next move once made
 
 ////////////////////////////
 
@@ -2010,18 +2020,28 @@ window.onload = function() {
 	socket.on('addGame', function(data) {
 		elem.innerHTML = data[0];
 		elem.classList.add('gameLengths');
+
 		document.getElementById('gameList').appendChild(elem).addEventListener('click', function() {
-			setClock(data[0]);
+			
+			setBoard.forEach(arr => document.getElementById(arr[0]).classList.toggle('rotateBoard'));
+			board.classList.toggle('rotateBoard');
+			
 			document.getElementById('modal').style.display = 'none';
 			document.getElementById('resign').classList.remove('noClick');
-			// lit();
-		})
+			
+			setClock(data[0]);
+			// START CLOCKS!
+
+			showTimers(document.getElementById('chat'));
+
+			socket.emit('initGame', data); // starts player1 turn
+			
+			awaitMove();
+		}); // SECOND PLAYER LOGIC
 	});
 
 	socket.on('gameDone', function(data) {
-        console.log(data);
-        console.log('done with ' + data[0] + ' minute game offered by --> id: ' + data[1]);
-        socket.broadcast.emit('gameDone', data);
+		// remove data[0] from #gameList
 	});
 	
 	/*
