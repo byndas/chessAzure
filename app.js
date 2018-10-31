@@ -1,6 +1,8 @@
 var express = require('express'); // check
+
 var app = express();
 app.use(express.static('public'));
+
 var http = require('http').Server(app); // check
 var port = process.env.PORT || 3000;
 var io = require('socket.io')(http); // check
@@ -14,22 +16,33 @@ app.get('/', function(req, res) {
 //////////////////////////////////////
 
 io.on('connection', function(socket) {
-    console.log('new client --> socket id: ' + socket.id);
+
+    console.log('socket connected --> id: ' + socket.id);
     
     socket.on('disconnect', function() {
-        console.log('client disconnected --> socket id: ' + socket.id);
+        console.log('socket disconnected --> id: ' + socket.id);
     });
 
+    socket.on('gameOffered', function(data) {
+        console.log(data);
+        // console.log('new ' + data[0] + 'minute game offered by --> id: ' + data[1]);
+        socket.broadcast.emit('gameOffered', data);
+    });
+
+    socket.on('gameDone', function(data) {
+        console.log('done with' + data[0] + 'minute game offered by --> id: ' + data[1]);
+        socket.broadcast.emit('gameDone', data);
+    });
+    
     socket.on('chat message', function(msg) {
-        // consoles out to the terminal
         console.log('socket id: ' + socket.id + ' --> says: ' + msg);
         // sends msg to other user connections
         socket.broadcast.emit('chat message', msg);
     });
 
-    // socket.on('move', function(clicks) {
-    //     socket.emit('move', clicks); 
-    // });
+    socket.on('move', function(clicks) {
+        socket.broadcast.emit('move', clicks); 
+    });
 });
 
 //////////////////////////////

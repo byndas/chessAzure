@@ -42,6 +42,8 @@ var board = document.getElementById('board'),
 	elem = document.createElement('H1'),
 	spinner = document.createElement('H1'),
 
+	socket = io(), // starts up socket.io
+
 	/////////////////////////////////////////////////////////////////////
 
 	userInput = 10,
@@ -1915,7 +1917,6 @@ function getMinutes() {
 				document.getElementById('chooseGame').style.display = 'none';
 				document.getElementById('offerGame').style.display = 'none';
 				document.getElementById('timeSet').style.display = 'none';
-				// document.getElementById('chat').style.display = 'block';
 				
 				spinner.style.display = 'flex';
 				spinner.innerHTML = 'AWAITING OPPONENT...';
@@ -1952,27 +1953,11 @@ function getMinutes() {
 
 				showTimers(document.getElementById('time1'));
 				showTimers(document.getElementById('time2'));
-				showTimers(document.getElementById('chat'));
-				/////////////////////////////////////////////////
-/*
-				// starts up socket.io
-				var socket = io();
-				
-				document.getElementById('send').addEventListener('click', function(e) {
-					e.preventDefault();
-					socket.emit('chat message', document.querySelector('#m').value);
-					document.querySelector('#m').value = '';
-					return false;
-				});
 
-				socket.on('chat message', function(msg) {
-					var newLI = document.createElement('LI');
-					var text = document.createTextNode(msg);
-					newLI.appendChild(text);
-					document.querySelector('#messages').appendChild(newLI);
-				});
-*/
-				// once socket confirms that player2 accepts game, do this
+				// showTimers(document.getElementById('chat'));
+
+				////////////////////////////////////////////
+				// once socket confirms that player2 accepts game, do this:
 				// document.getElementById('modal').style.display = 'none';
 				// document.getElementById('resign').classList.remove('noClick');
 				// lit();
@@ -2016,32 +2001,36 @@ window.onload = function() {
 	document.getElementById('resign').classList.add('noClick');
 
 	document.getElementById('start').addEventListener('click', getMinutes);
-	
-	///////////////////////
 
-	// starts up socket.io
-	var socket = io();
-	
+	socket.on('gameOffered', function() {
+		let newButton = document.createElement('BUTTON');
+		newButton.innerHTML = data[0];
+		document.getElementById('gameList').appendChild(newButon);
+	});
+
+	/*
+	//////////////////////////////////////////
+	// displays & sends chat message to server
 	document.getElementById('send').addEventListener('click', function(e) {
-		e.preventDefault();
+		e.preventDefault(); // prevents default page refresh?
 		socket.emit('chat message', document.getElementById('m').value);
 		document.getElementById('m').value = '';
 		return false;
 	});
-
+	// receives & displays opponent's chat message
 	socket.on('chat message', function(msg) {
-		var newLI = document.createElement('LI');
-		var text = document.createTextNode(msg);
+		let newLI = document.createElement('LI');
+		let text = document.createTextNode(msg);
 		newLI.appendChild(text);
 		document.getElementById('messages').appendChild(newLI);
 	});
+*/
 }
 
+// on #start click, push [timerSet, socket.id] to gamesOffered on server
 
-// on SET TIMER click, socket.broadcast (to everyone but me) timerSet
-// post this to ACCEPT GAME
+// if (!#gameList hasChild) { display #chooseGame }
 
-// only display ACCEPT GAME, if #gameList has any children
-
-// make a server-side collection of games offered that click-listens to
-// the game duration (minutes) to connect with the socket of the player offering
+// make a server-side collection called gamesOffered that:
+// click-listens to (minutes div)
+// which then connects with the socket of the player offering
