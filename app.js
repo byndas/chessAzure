@@ -25,13 +25,15 @@ io.on('connection', function(socket) {
 
     socket.on('gameOffered', function(data) {
         console.log(data);
-        // console.log('new ' + data[0] + 'minute game offered by --> id: ' + data[1]);
-        socket.broadcast.emit('gameOffered', data);
+        console.log('new ' + data[0] + ' minute game offered by --> id: ' + data[1]);
+        
+        socket.broadcast.emit('addGame', data);
     });
 
     socket.on('gameDone', function(data) {
-        console.log('done with' + data[0] + 'minute game offered by --> id: ' + data[1]);
-        socket.broadcast.emit('gameDone', data);
+        console.log(data);
+        console.log('done with ' + data[0] + ' minute game offered by --> id: ' + data[1]);
+        socket.emit('gameDone', data);
     });
     
     socket.on('chat message', function(msg) {

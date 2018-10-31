@@ -71,6 +71,42 @@ for (let k = 2; k < 6; k++) {
 
 ///////////////////////////////////////////////////////////////////
 
+function setClock(time) {
+
+	userInput = +(time);
+
+	clock1 = document.getElementById('time1');
+	clock1.innerHTML = userInput + ':00';
+
+	clock2 = document.getElementById('time2');
+	clock2.innerHTML = userInput + ':00';
+
+	blueTime = {
+		minutes: userInput,
+		tenths: 0,
+		hundredths: 0
+	};
+
+	orangeTime = {
+		minutes: userInput,
+		tenths: 0,
+		hundredths: 0
+	};
+
+	showTimers(document.getElementById('time1'));
+	showTimers(document.getElementById('time2'));
+
+	showTimers(document.getElementById('chat'));
+}
+
+function showTimers(timer) {
+	timer.style.display = 'block';
+	timer.style.visibility = "visible";
+	timer.style.opacity = '1';
+	timer.style.transform = 'scale(1.0)';
+	timer.style.transition = 'visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s';
+}
+
 function startClock() { runTimer = setInterval(countDown, 1000); };
 
 function countDown() {
@@ -1884,7 +1920,7 @@ function cancelGame() {
 	document.getElementById('start').innerHTML = 'SET TIMER';
 
 	elem.classList.add('gameLengths');
-	elem.parentNode.removeChild(elem);
+	// elem.parentNode.removeChild(elem);
 
 	spinner.style.display = 'none';
 	// document.getElementById('chat').style.display = 'none';
@@ -1894,6 +1930,9 @@ function cancelGame() {
 	document.getElementById('chooseGame').style.display = 'flex';
 	document.getElementById('offerGame').style.display = 'block';
 	document.getElementById('timeSet').style.display = 'block';
+
+	socket.emit('gameDone', [timerSet, socket.id]);
+
 }
 
 ///////////////////////
@@ -1905,10 +1944,8 @@ function getMinutes() {
 	if (timerSet) {
 		if (timerSet > 0) {
 			if (timerSet < 1000) {
-				//////////////////////////
-				elem.innerHTML = timerSet;
-				elem.classList.add('gameLengths');
-				document.getElementById('gameList').appendChild(elem);
+				/////////////////////////////////////////////////
+				socket.emit('gameOffered', [timerSet, socket.id]);
 
 				document.getElementById('start').removeEventListener('click', getMinutes);
 				document.getElementById('start').addEventListener('click', cancelGame);
@@ -1922,41 +1959,9 @@ function getMinutes() {
 				spinner.innerHTML = 'AWAITING OPPONENT...';
 				document.querySelector('.modalContent').appendChild(spinner).classList.remove('gameLengths');
 
+				///////////////////
+				setClock(timerSet);
 				/////////////////////////////////////////////////////////////////////////////////////////////
-				userInput = +(timerSet);
-
-				clock1 = document.getElementById('time1');
-				clock1.innerHTML = userInput + ':00';
-
-				clock2 = document.getElementById('time2');
-				clock2.innerHTML = userInput + ':00';
-
-				blueTime = {
-					minutes: userInput,
-					tenths: 0,
-					hundredths: 0
-				};
-
-				orangeTime = {
-					minutes: userInput,
-					tenths: 0,
-					hundredths: 0
-				};
-
-				function showTimers(timer) {
-					timer.style.display = 'block';
-					timer.style.visibility = "visible";
-					timer.style.opacity = '1';
-					timer.style.transform = 'scale(1.0)';
-					timer.style.transition = 'visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s';
-				}
-
-				showTimers(document.getElementById('time1'));
-				showTimers(document.getElementById('time2'));
-
-				// showTimers(document.getElementById('chat'));
-
-				////////////////////////////////////////////
 				// once socket confirms that player2 accepts game, do this:
 				// document.getElementById('modal').style.display = 'none';
 				// document.getElementById('resign').classList.remove('noClick');
@@ -2002,12 +2007,23 @@ window.onload = function() {
 
 	document.getElementById('start').addEventListener('click', getMinutes);
 
-	socket.on('gameOffered', function() {
-		let newButton = document.createElement('BUTTON');
-		newButton.innerHTML = data[0];
-		document.getElementById('gameList').appendChild(newButon);
+	socket.on('addGame', function(data) {
+		elem.innerHTML = data[0];
+		elem.classList.add('gameLengths');
+		document.getElementById('gameList').appendChild(elem).addEventListener('click', function() {
+			setClock(data[0]);
+			document.getElementById('modal').style.display = 'none';
+			document.getElementById('resign').classList.remove('noClick');
+			// lit();
+		})
 	});
 
+	socket.on('gameDone', function(data) {
+        console.log(data);
+        console.log('done with ' + data[0] + ' minute game offered by --> id: ' + data[1]);
+        socket.broadcast.emit('gameDone', data);
+	});
+	
 	/*
 	//////////////////////////////////////////
 	// displays & sends chat message to server
