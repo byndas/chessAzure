@@ -823,6 +823,7 @@ function toggleSides() {
 
 	// sends your two clicks to opponent's socket
 	socket.emit('move', [pieceToMove.id, goToDiv.id]);
+
 	console.log([socket.id, [pieceToMove.id, goToDiv.id]]);
 	console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
 	
@@ -2018,6 +2019,7 @@ window.onload = function() {
 	document.getElementById('start').addEventListener('click', getMinutes);
 
 	socket.on('addGame', function(data) {
+		console.log('addGame');
 		elem.innerHTML = data[0];
 		elem.classList.add('gameLengths');
 
