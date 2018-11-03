@@ -19,14 +19,21 @@ app.get('/', function(req, res) {
 io.on('connection', function(socket) {
 
     console.log('socket connected --> id: ' + socket.id);
-    
+
+    socket.on('requestOfferedGames', () => {
+        socket.emit('loadOfferedGames', games);
+    });
+
     socket.on('disconnect', function() {
         console.log('socket disconnected --> id: ' + socket.id);
     });
 
     socket.on('gameOffered', function(data) {
-        console.log('new ' + data[0] + ' minute game offered by --> id: ' + data[1]);
+        console.log(data[0] + ' minute game offered by --> id: ' + data[1]);
+
+        // sends data to everyone except senders
         socket.broadcast.emit('addGame', data);
+        
         games.push( [socket.id, undefined] );
     });
 
@@ -38,7 +45,7 @@ io.on('connection', function(socket) {
                 break;
             }
         }
-        console.log('line 41: games --> ' + games);
+        console.log('line 45: games --> ' + games);
         // data --> [ duration, player1 socket.id ]
         io.to(data[1]).emit('gameAccepted');
     });
@@ -62,15 +69,15 @@ io.on('connection', function(socket) {
     });
 
     socket.on('move', function(clicks) {
-        console.log('clicks --> ' + clicks);
-        console.log('socket.id --> ' + socket.id);
-        console.log('line 67: games --> ' + games);
+        console.log('line 69: clicks --> ' + clicks);
+        console.log('line 70: socket.id --> ' + socket.id);
+        console.log('line 71: games --> ' + games);
         // sends to all clients except sender
         // socket.broadcast.emit('move', clicks);
         let sendMoveToPlayer;
 
         for (let i = 0; i < games.length; i++) {
-            console.log('games[i] --> ' + games[i]);
+            console.log('line 77: games['+i+'] --> ' + games[i]);
             if (games[i][0] === socket.id) {
                 sendMoveToPlayer = games[i][1];
                 break;
@@ -81,11 +88,13 @@ io.on('connection', function(socket) {
             }
         }
 
-        console.log('sendMoveToPlayer --> ' + sendMoveToPlayer);
+        console.log('line 88: sendMoveToPlayer --> ' + sendMoveToPlayer);
+
+        // socket.broadcast.emit('move', clicks);
 
         // consider only sending to opponent's socket via: 
         // io.to(`${socket.id}`).emit('move', clicks);
-        io.to(sendMoveToPlayer).emit('move', clicks);
+        socket.to(sendMoveToPlayer).emit('move', clicks);
 
         // or only to everyone in that room except sender via: 
         // socket.to('game').emit('move', clicks);

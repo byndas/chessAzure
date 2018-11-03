@@ -6,6 +6,7 @@ var kingAttackers = [],
 	canEatKingAttacker = [],
 	castleIds = [],
 	moveHistory = [],
+	gameList = [],
 	bluePawnTakenBoxIdCounter = -1,
 	blueTakenBoxIdCounter = -1,
 	orangeTakenBoxIdCounter = 1,
@@ -824,7 +825,7 @@ function toggleSides() {
 	// sends your two clicks to opponent's socket
 	socket.emit('move', [pieceToMove.id, goToDiv.id]);
 
-	console.log([socket.id, [pieceToMove.id, goToDiv.id]]);
+	console.log('move --> ' + [socket.id, [pieceToMove.id, goToDiv.id]]);
 	console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
 	
 	awaitMove();
@@ -1988,8 +1989,47 @@ function getMinutes() {
 
 function awaitMove() {
 	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
+	activeSide.forEach(activePiece => {
+		activePiece.removeEventListener('click', wherePieceCanMove);
+	});
+	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
 //------------------------------------------------------------------------------------------
-	// STOP THIS FROM RUNNING 
+	// STOP THIS FROM RUNNING
+	// socket.on('move', function(clicks) {
+
+	// 	console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
+		
+	// 	lit(); // starts next move
+	// 	console.log('lit();');
+
+	// 	///////////////////////////////////////////
+		
+	// 	// triggers both clicks
+	// 	document.getElementById(clicks[0]).click();
+	// 	document.getElementById(clicks[1]).click();
+		
+	// 	console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
+	// });	
+} // listens to socket for opponent's move to arrive
+// then updates board & sends next move once made
+
+////////////////////////////
+
+window.onload = function() {
+
+	document.getElementById('resign').classList.add('noClick');
+	
+	document.getElementById('timeSet').addEventListener('keypress', ignoreKeys);
+
+	document.getElementById('start').addEventListener('click', getMinutes);
+
+	socket.emit('requestOfferedGames');
+
+	socket.on('loadOfferedGames', (data) => {
+		gameList = data;
+		
+	});
+
 	socket.on('move', function(clicks) {
 
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
@@ -2005,18 +2045,6 @@ function awaitMove() {
 		
 		console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
 	});	
-} // listens to socket for opponent's move to arrive
-// then updates board & sends next move once made
-
-////////////////////////////
-
-window.onload = function() {
-
-	document.getElementById('timeSet').addEventListener('keypress', ignoreKeys);
-
-	document.getElementById('resign').classList.add('noClick');
-
-	document.getElementById('start').addEventListener('click', getMinutes);
 
 	socket.on('addGame', function(data) {
 		console.log('addGame');
