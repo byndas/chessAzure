@@ -12,7 +12,7 @@ var kingAttackers = [],
 	orangeTakenBoxIdCounter = 1,
 	orangePawnTakenBoxIdCounter = 1,
 	nails, storedGreyPieceToMove,
-	enPassanting = false, drawForced = false,
+	enPassanting = false, drawForced = false, sendMove = true,
 	pins, kingInCheck, stuckActivePieces, litIds, storedLitIds,
 	checkSpaceId, pinnedLitIds, behindKingId, pawnBlocksKingAttacker,
 	kingStuck, newPieceClicked, pinnerPiece, greyPieceToMove, noCastle,
@@ -805,7 +805,9 @@ function toggleSides() {
 	activeSide.forEach(activePiece => {
 		activePiece.removeEventListener('click', wherePieceCanMove);
 	});
+
 	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
+	
 	if (activeSide[0].dataset.side === 'blue') {
 		activeSide = oranges;
 		passiveSide = blues;
@@ -822,14 +824,24 @@ function toggleSides() {
 	// 	activePiece.removeEventListener('click', wherePieceCanMove);
 	// });
 
-	// HERE IS YOUR PROBLEM !!!! THIS NEEDS CONDITIONS
-	// sends your two clicks to opponent's socket
-	socket.emit('move', [pieceToMove.id, goToDiv.id]);
+	console.log(sendMove);
 
-	console.log('move --> ' + [socket.id, [pieceToMove.id, goToDiv.id]]);
-	console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
-	
-	awaitMove();
+	// HERE IS YOUR PROBLEM !!!! THIS NEEDS CONDITIONS
+	if (sendMove) {
+		sendMove = false;
+		
+		// sends your two clicks to opponent's socket
+		socket.emit('move', [sendMove, pieceToMove.id, goToDiv.id]);
+
+		console.log('move --> ' + [sendMove, [pieceToMove.id, goToDiv.id]]);
+		console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
+		
+		awaitMove();
+	}
+	else { 
+		sendMove = true;
+		lit(); 
+	}
 }
 
 function gameOverModal() {
@@ -2035,14 +2047,16 @@ window.onload = function() {
 
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
 		
+		sendMove = clicks[0];
+
 		lit(); // starts next move
 		console.log('lit();');
 
 		///////////////////////////////////////////
 		
 		// triggers both clicks
-		document.getElementById(clicks[0]).click();
 		document.getElementById(clicks[1]).click();
+		document.getElementById(clicks[2]).click();
 		
 		console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
 	});	

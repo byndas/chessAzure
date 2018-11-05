@@ -69,6 +69,7 @@ io.on('connection', function(socket) {
     });
 
     socket.on('move', function(clicks) {
+        /*
         console.log('line 70: socket.id emits move --> ' + socket.id);
         console.log('line 69: moveclicks --> ' + clicks);
         console.log('line 71: games --> ' + games);
@@ -90,12 +91,12 @@ io.on('connection', function(socket) {
         }
 
         console.log('line 88: sendMoveToPlayer --> ' + sendMoveToPlayer);
-
-        // socket.broadcast.emit('move', clicks);
+        */
+        socket.broadcast.emit('move', clicks);
 
         // consider only sending to opponent's socket via: 
         // io.to(`${socket.id}`).emit('move', clicks);
-        io.to(sendMoveToPlayer).emit('move', clicks);
+        // io.to(sendMoveToPlayer).emit('move', clicks);
 
         // or only to everyone in that room except sender via: 
         // socket.to('game').emit('move', clicks);
