@@ -822,6 +822,7 @@ function toggleSides() {
 	// 	activePiece.removeEventListener('click', wherePieceCanMove);
 	// });
 
+	// HERE IS YOUR PROBLEM !!!! THIS NEEDS CONDITIONS
 	// sends your two clicks to opponent's socket
 	socket.emit('move', [pieceToMove.id, goToDiv.id]);
 
