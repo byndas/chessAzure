@@ -2019,6 +2019,8 @@ function awaitMove() {
 		activePiece.removeEventListener('click', wherePieceCanMove);
 	});
 	
+	toggleClocks();
+
 	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
 //------------------------------------------------------------------------------------------
 	// STOP THIS FROM RUNNING
@@ -2083,7 +2085,7 @@ window.onload = function() {
 			document.getElementById('resign').classList.remove('noClick');
 			
 			setClock(data[0]);
-			// START CLOCKS!
+			// toggleClocks();
 
 			showTimers(document.getElementById('chat'));
 
