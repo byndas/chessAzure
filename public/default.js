@@ -7,6 +7,7 @@ var kingAttackers = [],
 	castleIds = [],
 	moveHistory = [],
 	gameList = [],
+	move = [],
 	bluePawnTakenBoxIdCounter = -1,
 	blueTakenBoxIdCounter = -1,
 	orangeTakenBoxIdCounter = 1,
@@ -474,6 +475,9 @@ function movePiece(e) {
 ///////////////////////////
 
 function pawnEvolve(e) {
+
+	move.push(e.target.id);
+
 	// uses pieceToMove for pawn & e.target for new piece
 	// re-informs goToDiv
 	goToDiv.setAttribute('data-name', e.target.dataset.name);
@@ -509,6 +513,9 @@ function pawnEvolve(e) {
 }
 
 function swapSide(fromDiv, toDiv) {
+
+	move.push(fromDiv.id);
+	move.push(toDiv.id);
 
 	if (isCastle || enPassantMove) {
 		let priorMove = moveHistory[moveHistory.length - 1];
@@ -830,17 +837,19 @@ function toggleSides() {
 	if (sendMove) {
 		sendMove = false;
 		
-		// sends your two clicks to opponent's socket
-		socket.emit('move', [sendMove, pieceToMove.id, goToDiv.id]);
+		// sends your clicks to opponent's socket
+		// socket.emit('move', [sendMove, pieceToMove.id, goToDiv.id]);
+		socket.emit('move', [sendMove, move]);
 
-		console.log('move --> ' + [sendMove, [pieceToMove.id, goToDiv.id]]);
+		console.log('move --> ' + [sendMove, move]);
 		console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
 		
+		move = [];
 		awaitMove();
 	}
 	else { 
 		sendMove = true;
-		lit(); 
+		lit();
 	}
 }
 
@@ -2001,10 +2010,15 @@ function getMinutes() {
 //////////////////////
 
 function awaitMove() {
+	// move = [];
+	console.log('move array is empty');
+
 	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
+	
 	activeSide.forEach(activePiece => {
 		activePiece.removeEventListener('click', wherePieceCanMove);
 	});
+	
 	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
 //------------------------------------------------------------------------------------------
 	// STOP THIS FROM RUNNING
@@ -2036,15 +2050,10 @@ window.onload = function() {
 
 	document.getElementById('start').addEventListener('click', getMinutes);
 
-	socket.emit('requestOfferedGames');
-
-	socket.on('loadOfferedGames', (data) => {
-		gameList = data;
-		
-	});
+	// socket.emit('requestOfferedGames');
+	// socket.on('loadOfferedGames', (data) => { gameList = data; });
 
 	socket.on('move', function(clicks) {
-
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
 		
 		sendMove = clicks[0];
@@ -2054,11 +2063,10 @@ window.onload = function() {
 
 		///////////////////////////////////////////
 		
-		// triggers both clicks
-		document.getElementById(clicks[1]).click();
-		document.getElementById(clicks[2]).click();
+		// triggers all clicks
+		clicks[1].forEach(id => { document.getElementById(id).click(); });
 		
-		console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
+		// console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
 	});	
 
 	socket.on('addGame', function(data) {
