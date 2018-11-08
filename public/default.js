@@ -457,11 +457,11 @@ function movePiece(e) {
 			}
 		}
 	}
-	else { // covers pieceToMove eats goToDiv
-		eat(goToDiv);
-	}
+	// covers pieceToMove eats goToDiv
+	else { eat(goToDiv); }
 	// covers pawnToMove moving one or two empty spaces
 	swapSide(pieceToMove, goToDiv);
+	// if pawn evolves
 	if (noPawnEvolution) { toggleSides(); }
 	else { // since pawn evolves
 		// removes click-listeners from activePieces
@@ -477,6 +477,7 @@ function movePiece(e) {
 function pawnEvolve(e) {
 
 	move.push(e.target.id);
+	console.log('pawnEvolve --> ' + e.target.id + ' pushed to move --> ' + move);
 
 	// uses pieceToMove for pawn & e.target for new piece
 	// re-informs goToDiv
@@ -514,8 +515,12 @@ function pawnEvolve(e) {
 
 function swapSide(fromDiv, toDiv) {
 
+	move = [];
+	console.log('move array emptied');
+
 	move.push(fromDiv.id);
 	move.push(toDiv.id);
+	console.log('swapSide --> ' + fromDiv.id + ' & ' + toDiv.id + ' pushed to move --> ' + move);
 
 	if (isCastle || enPassantMove) {
 		let priorMove = moveHistory[moveHistory.length - 1];
@@ -635,18 +640,26 @@ function castling(e) {
 	switch (e.target.id) {
 		case '27':
 			swapSide(document.getElementById('07'), document.getElementById('37'));
+			move.pop();
+			move.pop();
 			blueKingFirstMove = true;
 			break;
 		case '67':
 			swapSide(document.getElementById('77'), document.getElementById('57'));
+			move.pop();
+			move.pop();
 			blueKingFirstMove = true;
 			break;
 		case '20':
 			swapSide(document.getElementById('00'), document.getElementById('30'));
+			move.pop();
+			move.pop();
 			orangeKingFirstMove = true;
 			break;
 		case '60':
 			swapSide(document.getElementById('70'), document.getElementById('50'));
+			move.pop();
+			move.pop();
 			orangeKingFirstMove = true;
 			break;
 	}
@@ -807,6 +820,8 @@ function pinnedPieceLit() {
 ////////////////////////
 
 function toggleSides() {
+	console.log('ENTER ToggleSides');
+
 	console.log(activeSide[0].dataset.side + ' moves on this board');
 	// removes click-listeners from activePieces
 	activeSide.forEach(activePiece => {
@@ -831,9 +846,8 @@ function toggleSides() {
 	// 	activePiece.removeEventListener('click', wherePieceCanMove);
 	// });
 
-	console.log(sendMove);
+	console.log('sendMove --> ' + sendMove);
 
-	// HERE IS YOUR PROBLEM !!!! THIS NEEDS CONDITIONS
 	if (sendMove) {
 		sendMove = false;
 		
@@ -843,8 +857,7 @@ function toggleSides() {
 
 		console.log('move --> ' + [sendMove, move]);
 		console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
-		
-		move = [];
+
 		awaitMove();
 	}
 	else { 
@@ -1941,7 +1954,7 @@ function lit() {
 ////////////////////////
 
 function ignoreKeys(e) {
-	switch(e.keyCode) {
+	switch (e.keyCode) {
 		case 45: case 46: return e.preventDefault();
 		case 13: document.getElementById('start').click();
 	}
@@ -2000,6 +2013,7 @@ function getMinutes() {
 				socket.on('gameAccepted', function() {
 					document.getElementById('modal').style.display = 'none';
 					document.getElementById('resign').classList.remove('noClick');
+					showTimers(document.getElementById('chat'));
 					lit();
 				});
 			}
@@ -2010,16 +2024,14 @@ function getMinutes() {
 //////////////////////
 
 function awaitMove() {
-	// move = [];
-	console.log('move array is empty');
 
+	toggleClocks();
+	
 	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
 	
 	activeSide.forEach(activePiece => {
 		activePiece.removeEventListener('click', wherePieceCanMove);
 	});
-	
-	toggleClocks();
 
 	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
 //------------------------------------------------------------------------------------------
@@ -2056,6 +2068,7 @@ window.onload = function() {
 	// socket.on('loadOfferedGames', (data) => { gameList = data; });
 
 	socket.on('move', function(clicks) {
+
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
 		
 		sendMove = clicks[0];
@@ -2067,9 +2080,7 @@ window.onload = function() {
 		
 		// triggers all clicks
 		clicks[1].forEach(id => { document.getElementById(id).click(); });
-		
-		// console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
-	});	
+	});
 
 	socket.on('addGame', function(data) {
 		console.log('addGame');
@@ -2085,7 +2096,6 @@ window.onload = function() {
 			document.getElementById('resign').classList.remove('noClick');
 			
 			setClock(data[0]);
-			// toggleClocks();
 
 			showTimers(document.getElementById('chat'));
 
@@ -2099,23 +2109,28 @@ window.onload = function() {
 		// remove data[0] from #gameList
 	});
 	
-	/*
 	//////////////////////////////////////////
 	// displays & sends chat message to server
 	document.getElementById('send').addEventListener('click', function(e) {
 		e.preventDefault(); // prevents default page refresh?
+
+		let newMessage = document.getElementById('m').value;
+		let newDIV = document.createElement('DIV');
+		newDIV.style.color = '#967a5e';
+		let text = document.createTextNode(newMessage);
+		newDIV.appendChild(text);
+		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
+		
 		socket.emit('chat message', document.getElementById('m').value);
 		document.getElementById('m').value = '';
-		return false;
 	});
 	// receives & displays opponent's chat message
-	socket.on('chat message', function(msg) {
-		let newLI = document.createElement('LI');
+	socket.on('chat message', function(msg) {		
+		let newDIV = document.createElement('DIV');
 		let text = document.createTextNode(msg);
-		newLI.appendChild(text);
-		document.getElementById('messages').appendChild(newLI);
+		newDIV.appendChild(text);
+		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
 	});
-*/
 }
 
 // on #start click, push [timerSet, socket.id] to gamesOffered on server

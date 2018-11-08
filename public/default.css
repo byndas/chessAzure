@@ -222,6 +222,7 @@ html, body {
   .time {
     text-align: center;
     font-size: 40px;
+    font-weight: bold;
     background-color: rgba(127, 255, 212, 0.25);
     color: rgba(12, 22, 22, 0.9);
     opacity: 0;
@@ -267,13 +268,8 @@ html, body {
   }
   
   .modalContent {
-    /* position: absolute; */
     display: flex;
-    /* justify-content: space-between; */
     justify-content: center;
-    /* top: 50%; */
-    /* left: 50%; */
-    /* transform: translate(-50%, -50%); */
     background: rgba(53, 20, 20, 0.62);
     width: 100%;
     padding-top: 20px;
@@ -281,15 +277,11 @@ html, body {
     text-align: center;
     color: rgba(71, 105, 168, 0.2);
     font-weight: bold;
-    /* border-radius: 0.5rem; */
   }
   
   #chooseGame {
-    background-color: white;
     display: flex;
     justify-content: center;
-    /* margin: auto; */
-    /* border-radius: 0.5rem; */
     background-color: rgba(71, 105, 168, 0.2);
   }
   
@@ -317,7 +309,7 @@ html, body {
     color: #967a5e;
   }
   
-  #start {
+  #start, #send {
     margin-left: 2.5%;
     font-size: 40px;
     font-weight: bold;
@@ -328,7 +320,7 @@ html, body {
     border-color: rgba(189, 72, 26, 0.65);
   }
   
-  #start:hover {
+  #start:hover, #send:hover {
     background-color: rgba(130, 30, 30, 0.2);
     border-color: rgba(189, 72, 26, 0.33);
   }
@@ -381,29 +373,41 @@ html, body {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font: 13px Helvetica, Arial;
+      /* font: 13px Helvetica, Arial; */
     }
   
     form {
       display: flex;
+      padding-top: 5px;
     }
   
     #m {
       border: 0;
       width: 90%;
+      background-color: rgba(71, 105, 168, 0.2);
+      color: #967a5e;
+      text-align: center;
+      font-weight: bold;
     }
   
     #send {
-      background: rgb(130, 224, 255);
-      border: none;
-      width: 10%rem;
-      color: rgba(12, 22, 22, 0.9);
+      /* background: rgb(130, 224, 255); */
+      /* border: none; */
+      width: 10% rem;
+      /* color: rgba(12, 22, 22, 0.9); */
+      border-radius: 0;
     }
     
     #messages {
       list-style-type: none;
-      /* margin: 0;
-      padding: 0; */
+      display: flex;
+      flex-direction: column;
     }
-    #messages li { padding: 1px 1px; }
-    #messages li:nth-child(odd) { background: #eee; }
+    #messages div {
+      text-align: center;
+      background: transparent;
+      color: rgba(87, 127, 133);
+      font-weight: bold;
+      font-size: 30px;
+      padding-top: 10px;
+    }
