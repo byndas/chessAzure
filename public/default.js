@@ -23,7 +23,7 @@ var kingAttackers = [],
 	goToDiv, enPassantDiv, pawnJumpDiv, index, index1, index2, pinnedPieces,
 	moves, bishopMoves, bishopX, bishopY, openAndOpponentHeldKingSpaces,
 	rookMoves, kingSpaces, isCastle, enPassantMove, currentBoard, pieceIds,
-	firstReview, message, gameOver;
+	firstReview, message, gameOver, roomId;
 
 var board = document.getElementById('board'),
 	
@@ -853,9 +853,9 @@ function toggleSides() {
 		
 		// sends your clicks to opponent's socket
 		// socket.emit('move', [sendMove, pieceToMove.id, goToDiv.id]);
-		socket.emit('move', [sendMove, move]);
+		socket.emit('move', [sendMove, move, roomId]);
 
-		console.log('move --> ' + [sendMove, move]);
+		console.log('move --> ' + [sendMove, move, roomId]);
 		console.log(passiveSide[0].dataset.side + ' sends its move to ' + activeSide[0].dataset.side);
 
 		awaitMove();
@@ -1994,6 +1994,8 @@ function getMinutes() {
 			if (timerSet < 1000) {
 				//////////////////////////////////////////////////
 				socket.emit('gameOffered', [timerSet, socket.id]);
+				roomId = socket.id;
+				console.log('roomId = ' + roomId);
 
 				document.getElementById('start').removeEventListener('click', getMinutes);
 				document.getElementById('start').addEventListener('click', cancelGame);
@@ -2083,11 +2085,16 @@ window.onload = function() {
 	});
 
 	socket.on('addGame', function(data) {
-		console.log('addGame');
+		// socket is player 2
+		console.log('addGame --> player 2 id: ' + socket.id);
+
 		elem.innerHTML = data[0];
 		elem.classList.add('gameLengths');
 
 		document.getElementById('gameList').appendChild(elem).addEventListener('click', function() {
+
+			roomId = data[1];
+			console.log('roomId = ' + roomId);
 
 			setBoard.forEach(arr => document.getElementById(arr[0]).classList.toggle('rotateBoard'));
 			board.classList.toggle('rotateBoard');
@@ -2095,13 +2102,10 @@ window.onload = function() {
 			document.getElementById('modal').style.display = 'none';
 			document.getElementById('resign').classList.remove('noClick');
 			
-			setClock(data[0]);
-
-			showTimers(document.getElementById('chat'));
-
-			socket.join(data[1]);
-
 			socket.emit('initGame', data); // starts player1 turn
+			
+			setClock(data[0]);
+			showTimers(document.getElementById('chat'));
 			
 			awaitMove();
 		}); // SECOND PLAYER LOGIC
