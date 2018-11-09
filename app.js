@@ -40,9 +40,11 @@ io.on('connection', function(socket) {
     });
 
     socket.on('initGame', function(data) {
+        // data --> [ duration, player1 socket.id ]
+        
         // player 2 joins room hosted by player 1
         socket.join(data[1]);
-        /*
+        
         for (let i = 0; i < games.length; i++) {
             if (games[i][0] === data[1]) {
                 console.log('!!!')
@@ -51,10 +53,7 @@ io.on('connection', function(socket) {
             }
         }
         console.log('line 45: games --> ' + games);
-        */
         
-        // data --> [ duration, player1 socket.id ]
-
         // sends only to player 1 (private message)
         io.to(data[1]).emit('gameAccepted');
     });
@@ -62,6 +61,7 @@ io.on('connection', function(socket) {
     socket.on('gameDone', function(data) {
         console.log('done with ' + data[0] + ' minute game offered by --> id: ' + data[1]);
         socket.emit('gameDone', data);
+        /*
         // removes that game from games
         for (let i = 0; i < games.length; i++) {
             if (games[i][0] === data[1]) {
@@ -69,12 +69,34 @@ io.on('connection', function(socket) {
                 break;
             }
         }
+        */
     });
 
     socket.on('chat message', function(msg) {
         console.log('socket id: ' + socket.id + ' --> says: ' + msg);
-        // sends msg to other user connections, not sender
-        socket.broadcast.emit('chat message', msg);
+
+        let sendMoveToPlayer;
+
+        for (let i = 0; i < games.length; i++) {
+            if (games[i][0] === socket.id) {
+                sendMoveToPlayer = games[i][1];
+                break;
+            }
+            else if (games[i][1] === socket.id) {
+                sendMoveToPlayer = games[i][0];
+                break;
+            }
+        }
+
+        console.log('line 93: sendMoveToPlayer --> ' + sendMoveToPlayer);
+
+        // sends only to opponent (private message)??
+        // seems instead to send to everyone in room, including sender
+        // io.to(sendMoveToPlayer).emit('chat message', msg);
+
+        // sends to everyone in room except sender
+        socket.to(sendMoveToPlayer).emit('chat message', msg);
+
     });
 
     socket.on('move', function(clicks) {

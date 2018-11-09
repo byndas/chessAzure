@@ -2124,17 +2124,21 @@ window.onload = function() {
 		let newDIV = document.createElement('DIV');
 		newDIV.style.color = '#967a5e';
 		let text = document.createTextNode(newMessage);
+		newDIV.appendChild(text);
 		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
 		
 		socket.emit('chat message', document.getElementById('m').value);
+		
 		document.getElementById('m').value = '';
 	});
 	// receives & displays opponent's chat message
-	socket.on('chat message', function(msg) {		
+	socket.on('chat message', function(msg) {
+		console.log('received chat message from server');
 		let newDIV = document.createElement('DIV');
 		let text = document.createTextNode(msg);
 		newDIV.appendChild(text);
-		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
+		document.getElementById('messages').appendChild(newDIV);
+		// .scrollIntoView(false);
 	});
 }
 
