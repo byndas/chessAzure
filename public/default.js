@@ -1992,7 +1992,7 @@ function getMinutes() {
 	if (timerSet) {
 		if (timerSet > 0) {
 			if (timerSet < 1000) {
-				/////////////////////////////////////////////////
+				//////////////////////////////////////////////////
 				socket.emit('gameOffered', [timerSet, socket.id]);
 
 				document.getElementById('start').removeEventListener('click', getMinutes);
@@ -2088,7 +2088,7 @@ window.onload = function() {
 		elem.classList.add('gameLengths');
 
 		document.getElementById('gameList').appendChild(elem).addEventListener('click', function() {
-			
+
 			setBoard.forEach(arr => document.getElementById(arr[0]).classList.toggle('rotateBoard'));
 			board.classList.toggle('rotateBoard');
 			
@@ -2098,6 +2098,8 @@ window.onload = function() {
 			setClock(data[0]);
 
 			showTimers(document.getElementById('chat'));
+
+			socket.join(data[1]);
 
 			socket.emit('initGame', data); // starts player1 turn
 			
@@ -2118,7 +2120,6 @@ window.onload = function() {
 		let newDIV = document.createElement('DIV');
 		newDIV.style.color = '#967a5e';
 		let text = document.createTextNode(newMessage);
-		newDIV.appendChild(text);
 		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
 		
 		socket.emit('chat message', document.getElementById('m').value);

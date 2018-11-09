@@ -31,8 +31,10 @@ io.on('connection', function(socket) {
     socket.on('gameOffered', function(data) {
         console.log(data[0] + ' minute game offered by first player --> id: ' + data[1]);
 
+        socket.join(data[1]);
+
         // sends data to everyone except sender
-        socket.broadcast.emit('addGame', data);
+        io.broadcast.emit('addGame', data);
         
         games.push( [socket.id, undefined] );
     });
@@ -61,7 +63,7 @@ io.on('connection', function(socket) {
             }
         }
     });
-    
+
     socket.on('chat message', function(msg) {
         console.log('socket id: ' + socket.id + ' --> says: ' + msg);
         // sends msg to other user connections, not sender
