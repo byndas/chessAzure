@@ -868,7 +868,7 @@ function toggleSides() {
 
 function gameOverModal() {
 
-	if (activeKing.dataset.side === 'blue') {
+	if (activeSide[0].dataset.side === 'blue') {
 		blueGameOverModal.classList.add('showModal');
 		blueGameOverModal.innerHTML = message;
 	}
@@ -892,9 +892,17 @@ function endOfGame() {
 
 	message = activeKing.dataset.side + ' king check mated';
 	gameOverModal();
+
+	socket.emit('endOfGame');
 }
 
 function resign() {
+	socket.emit('resignation');
+	resignProcess();
+}
+
+function resignProcess() {
+
 	gameOver = true;
 
 	clearInterval(runTimer);
@@ -958,7 +966,7 @@ function resign() {
 
 	document.getElementById('resign').classList.add('noClick');
 
-	message = activeKing.dataset.side + " king resigns";
+	message = activeSide[0].dataset.side + " king resigns";
 	
 	gameOverModal();
 }
@@ -2070,7 +2078,6 @@ window.onload = function() {
 	// socket.on('loadOfferedGames', (data) => { gameList = data; });
 
 	socket.on('move', function(clicks) {
-
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
 		
 		sendMove = clicks[0];
@@ -2081,7 +2088,13 @@ window.onload = function() {
 		///////////////////////////////////////////
 		
 		// triggers all clicks
-		clicks[1].forEach(id => { document.getElementById(id).click(); });
+		clicks[1].forEach(id => {
+			document.getElementById(id).click();
+		});
+
+		if (moveHistory.length === 1) {
+			document.getElementById('resign').classList.remove('noClick');
+		}
 	});
 
 	socket.on('addGame', function(data) {
@@ -2100,7 +2113,6 @@ window.onload = function() {
 			board.classList.toggle('rotateBoard');
 			
 			document.getElementById('modal').style.display = 'none';
-			document.getElementById('resign').classList.remove('noClick');
 			
 			socket.emit('initGame', data); // starts player1 turn
 			
@@ -2111,8 +2123,12 @@ window.onload = function() {
 		}); // SECOND PLAYER LOGIC
 	});
 
-	socket.on('gameDone', function(data) {
-		// remove data[0] from #gameList
+	socket.on('gameOver', function() {
+		lit();
+	});
+
+	socket.on('opponentResigns', function() {
+		resignProcess();
 	});
 	
 	//////////////////////////////////////////

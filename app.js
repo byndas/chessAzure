@@ -7,13 +7,26 @@ var http = require('http').Server(app); // check
 var port = process.env.PORT || 3000;
 var io = require('socket.io')(http); // check
 
-var games = [];
+var games = [], sendMoveToPlayer;
 /////////////////////////////////
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/default.html');
 });
 
+function getOpponentId(socket) {
+
+    for (let i = 0; i < games.length; i++) {
+        if (games[i][0] === socket.id) {
+            sendMoveToPlayer = games[i][1];
+            break;
+        }
+        else if (games[i][1] === socket.id) {
+            sendMoveToPlayer = games[i][0];
+            break;
+        }
+    }
+}
 //////////////////////////////////////
 
 io.on('connection', function(socket) {
@@ -58,9 +71,9 @@ io.on('connection', function(socket) {
         io.to(data[1]).emit('gameAccepted');
     });
 
-    socket.on('gameDone', function(data) {
-        console.log('done with ' + data[0] + ' minute game offered by --> id: ' + data[1]);
-        socket.emit('gameDone', data);
+    socket.on('endOfGame', function() {       
+        getOpponentId(socket);   
+        io.to(sendMoveToPlayer).emit('gameOver');
         /*
         // removes that game from games
         for (let i = 0; i < games.length; i++) {
@@ -72,21 +85,15 @@ io.on('connection', function(socket) {
         */
     });
 
+    socket.on('resignation', function() {       
+        getOpponentId(socket);
+        io.to(sendMoveToPlayer).emit('opponentResigns');
+    });
+
     socket.on('chat message', function(msg) {
         console.log('socket id: ' + socket.id + ' --> says: ' + msg);
 
-        let sendMoveToPlayer;
-
-        for (let i = 0; i < games.length; i++) {
-            if (games[i][0] === socket.id) {
-                sendMoveToPlayer = games[i][1];
-                break;
-            }
-            else if (games[i][1] === socket.id) {
-                sendMoveToPlayer = games[i][0];
-                break;
-            }
-        }
+        getOpponentId(socket);
 
         console.log('line 93: sendMoveToPlayer --> ' + sendMoveToPlayer);
 
