@@ -2044,23 +2044,6 @@ function awaitMove() {
 	});
 
 	console.log(activeSide[0].dataset.side + ' lacks click-listeners');
-//------------------------------------------------------------------------------------------
-	// STOP THIS FROM RUNNING
-	// socket.on('move', function(clicks) {
-
-	// 	console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
-		
-	// 	lit(); // starts next move
-	// 	console.log('lit();');
-
-	// 	///////////////////////////////////////////
-		
-	// 	// triggers both clicks
-	// 	document.getElementById(clicks[0]).click();
-	// 	document.getElementById(clicks[1]).click();
-		
-	// 	console.log(activeSide[0].dataset.side + ' moves --> ' + clicks);
-	// });	
 } // listens to socket for opponent's move to arrive
 // then updates board & sends next move once made
 
