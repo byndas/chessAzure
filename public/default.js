@@ -1887,6 +1887,7 @@ function lit() {
 	// ********** META-LOGIC **********
 
 	toggleClocks();
+	console.log('toggleClocks() LIT');
 
 	if (castleIds.length) {
 		castleIds.forEach(id => {
@@ -2036,6 +2037,7 @@ function getMinutes() {
 function awaitMove() {
 
 	toggleClocks();
+	console.log('toggleClocks() AWAIT');
 	
 	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
 	
