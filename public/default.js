@@ -2035,9 +2035,6 @@ function getMinutes() {
 //////////////////////
 
 function awaitMove() {
-
-	toggleClocks();
-	console.log('toggleClocks() AWAIT');
 	
 	console.log(passiveSide[0].dataset.side + ' waits to receive ' + activeSide[0].dataset.side + ' move');
 	
@@ -2103,6 +2100,9 @@ window.onload = function() {
 			
 			setClock(data[0]);
 			showTimers(document.getElementById('chat'));
+			
+			toggleClocks();
+			console.log('toggleClocks() p2 starts');
 			
 			awaitMove();
 		}); // SECOND PLAYER LOGIC
