@@ -128,9 +128,9 @@ function countDown() {
 }
 
 function toggleClocks() {
-
+	// stops current clock
 	clearInterval(runTimer);
-
+	// swaps current clock
 	if (activeSide[0].dataset.side === 'blue') {
 		obj = blueTime;
 		clockToUpdate = clock1;
@@ -139,7 +139,7 @@ function toggleClocks() {
 		obj = orangeTime;
 		clockToUpdate = clock2;
 	}
-	
+	// starts new current clock
 	startClock();
 }
 
