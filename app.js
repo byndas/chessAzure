@@ -113,7 +113,7 @@ io.on('connection', function(socket) {
         console.log('line 80: games --> ' + games);
         
         // sends to all clients except sender
-        // socket.broadcast.emit('move', clicks);
+        // socket.broadcast.emit('movePiece', clicks);
         
         let sendMoveToPlayer;
 
@@ -133,12 +133,16 @@ io.on('connection', function(socket) {
         console.log('line 100: sendMoveToPlayer --> ' + sendMoveToPlayer);
         */
         console.log('clicks[2]: ' + clicks[2]);
-       // sends to all clients in room except sender
-        socket.broadcast.to(clicks[2]).emit('move', clicks);
+        // sends to all clients in room except sender
+        socket.broadcast.to(clicks[2]).emit('movePiece', clicks);
 
         // sends only to opponent's socket via: 
-        // io.to(`${socket.id}`).emit('move', clicks);
-        // io.to(sendMoveToPlayer).emit('move', clicks);
+        // io.to(`${socket.id}`).emit('movePiece', clicks);
+        // io.to(sendMoveToPlayer).emit('movePiece', clicks);
+    });
+    
+    socket.on('newTurn', function(hostId) {
+        socket.to(hostId).emit('clockToggler')
     });
 });
 

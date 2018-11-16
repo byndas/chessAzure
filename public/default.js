@@ -2059,7 +2059,7 @@ window.onload = function() {
 	// socket.emit('requestOfferedGames');
 	// socket.on('loadOfferedGames', (data) => { gameList = data; });
 
-	socket.on('move', function(clicks) {
+	socket.on('movePiece', function(clicks) {
 		console.log(passiveSide[0].dataset.side + ' receives ' + activeSide[0].dataset.side + ' move --> ' + clicks);
 		
 		sendMove = clicks[0];
@@ -2077,6 +2077,12 @@ window.onload = function() {
 		if (moveHistory.length === 1) {
 			document.getElementById('resign').classList.remove('noClick');
 		}
+
+		socket.emit('newTurn', clicks[2]);
+	});
+
+	socket.on('clockToggler', function() {
+		toggleClocks();
 	});
 
 	socket.on('addGame', function(data) {
