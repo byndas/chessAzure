@@ -2089,6 +2089,8 @@ window.onload = function() {
 		// socket is player 2
 		console.log('addGame --> player 2 id: ' + socket.id);
 
+		m.style.color = '#967a5e';
+
 		elem.innerHTML = data[0];
 		elem.classList.add('gameLengths');
 
@@ -2125,11 +2127,13 @@ window.onload = function() {
 	//////////////////////////////////////////
 	// displays & sends chat message to server
 	document.getElementById('send').addEventListener('click', function(e) {
-		e.preventDefault(); // prevents default page refresh?
+		e.preventDefault(); // prevents default page refresh
 
 		let newMessage = document.getElementById('m').value;
 		let newDIV = document.createElement('DIV');
-		newDIV.style.color = '#967a5e';
+		
+		if (socket.id !== roomId) { newDIV.style.color = '#967a5e'; }
+
 		let text = document.createTextNode(newMessage);
 		newDIV.appendChild(text);
 		document.getElementById('messages').appendChild(newDIV).scrollIntoView(false);
@@ -2145,6 +2149,8 @@ window.onload = function() {
 		let text = document.createTextNode(msg);
 		newDIV.appendChild(text);
 		document.getElementById('messages').appendChild(newDIV);
+		
+		if (socket.id === roomId) { newDIV.style.color = '#967a5e'; }
 		// .scrollIntoView(false);
 	});
 }
